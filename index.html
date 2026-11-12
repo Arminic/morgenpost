@@ -155,6 +155,7 @@ body.online .localonly{display:none}
 .pg .hline{position:absolute;left:11mm;right:11mm;top:148.5mm;border-top:.5pt solid var(--line)}
 .pg .vline{position:absolute;left:105mm;border-left:.5pt solid var(--line);width:0}
 .pg .art .im{height:calc(44mm*var(--s,1));margin:1.5mm 0 2.5mm}
+.pg .art .ph{display:block;width:100%;background:var(--paper);color:var(--gold);overflow:hidden}.pg .art .ph>svg{display:block;width:100%;height:100%}
 .pg .bottom .art .im{height:calc(40mm*var(--s,1))}
 .pg .art h2{margin-bottom:0}
 .pg .art p{font-size:calc(7.9pt*var(--s,1));line-height:1.48}
@@ -326,7 +327,8 @@ body.online .localonly{display:none}
       <label>Text EN</label><textarea name="text_en" class="prose" rows="5"></textarea>
       <label>Eckdaten EN</label><textarea name="facts_en" rows="3" placeholder="Distance: 5.0 km&#10;Duration: 1.5 h"></textarea></details>
     <label>Bild</label>
-    <div style="display:flex;gap:10px;align-items:center"><img id="tipimg" style="width:120px;height:80px;object-fit:cover;border-radius:6px;background:#eee"><button class="sm" data-act="tipimg" type="button">Bild wählen</button></div>
+    <div style="display:flex;gap:10px;align-items:center"><img id="tipimg" style="width:120px;height:80px;object-fit:cover;border-radius:6px;background:#eee"><button class="sm" data-act="tipimg" type="button">Bild wählen</button><button class="sm del" data-act="tipimgdel" type="button">Bild entfernen</button>
+      <div style="margin-left:auto"><label style="margin:0">Symbol ohne Bild</label><select name="icon" style="width:auto"></select></div></div>
   </div>
   <div class="ft"><button class="del" id="tipdel" data-act="deltip" type="button">Löschen</button><span style="flex:1"></span>
     <button data-act="closetip" type="button">Abbrechen</button><button class="pri" data-act="savetip" type="button">Speichern</button></div>
@@ -881,11 +883,40 @@ const ICONS = {
   ticket: '<path d="M3.5 8.5V6h17v2.5a2.5 2.5 0 0 0 0 5V16h-17v-2.5a2.5 2.5 0 0 0 0-5z"/><path d="M14 6v10" stroke-dasharray="1.6 1.8"/>',
   phone: '<path d="M6.5 3.5h3l1.5 4-2 1.5a10 10 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A15.5 15.5 0 0 1 4.5 5.5a2 2 0 0 1 2-2z"/>',
   bike: '<circle cx="6" cy="16" r="3.5"/><circle cx="18" cy="16" r="3.5"/><path d="M6 16l4-7h6l2 7M10 9l3 7h-1M14.5 6h2.5"/>',
+  ski: '<path d="M6.5 3.5c-1.2 0-1.8 1.2-1 2.2L18.5 21M17.5 3.5c1.2 0 1.8 1.2 1 2.2L5.5 21"/><path d="M9 8.5l6 0"/>',
+  sled: '<path d="M6 14l2-6h7l2 6"/><path d="M5 14h13M7 14v4M16 14v4"/><path d="M3 18h16.5a2 2 0 0 0 2-2"/>',
+  skate: '<path d="M6 4h5l1 8 5.5 1.8A2.2 2.2 0 0 1 19 16v1H6z"/><path d="M8 7.5h3.4M8 10h3.7"/><path d="M4 20.5h16"/>',
+  snow: '<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/><path d="M9.5 4.5L12 7l2.5-2.5M9.5 19.5L12 17l2.5 2.5"/>',
+  castle: '<path d="M4 21V8h3v2h2.5V8h5v2H17V8h3v13z"/><path d="M10 21v-4a2 2 0 0 1 4 0v4M3 21h18"/><path d="M12 8V3l3 1.2L12 5.4"/>',
+  town: '<path d="M3 21V11l5-4 5 4v10M13 21V9l4-3.5L21 9v12M2 21h20"/><path d="M7 21v-3h2v3M16 12h2M16 15.5h2"/><path d="M17 5.5V3"/>',
+  mine: '<path d="M4.5 9.5C8 5 15 4.5 19.5 8.5"/><path d="M12 6.5V21"/><path d="M8 21h8"/><circle cx="17.5" cy="16.5" r="2.2"/><path d="M17.5 13v1.3"/>',
+  cable: '<path d="M2 5.5L22 2.5"/><path d="M12 4v4"/><rect x="6.5" y="8" width="11" height="10" rx="2.2"/><path d="M6.5 12.5h11M12 12.5V18"/><path d="M4 21.5h16" stroke-dasharray="1.5 2"/>',
+  gorge: '<path d="M3.5 3c1.5 4 1.5 12 0 18M20.5 3c-1.5 4-1.5 12 0 18"/><path d="M9 4v8M12 4v11M15 4v8"/><path d="M7.5 18.5c2.5 1.8 6.5 1.8 9 0"/>',
+  dino: '<path d="M2.5 17c2.5 0 4-1.3 5-3 1.3-2.2 3.3-3.5 6-3.5h1.5c1.4 0 2.5-1.1 2.5-2.5V6c0-.9.7-1.6 1.6-1.6h1.4"/><path d="M7.5 13.5c-.3 2.6 1 4 3 4h5.3c1.3 0 2.2-.9 2.2-2.2V9"/><path d="M10 17.5v3M15.5 17.5v3"/>',
+  hike: '<path d="M12 21V3"/><path d="M12 5h7l2 2.2L19 9.5h-7M12 12H5l-2 2.2L5 16.5h7"/><path d="M8.5 21h7"/>',
+  lake: '<path d="M2.5 14.5c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6.5 0M2.5 19c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6.5 0"/><path d="M4 11l4.5-6 3 3.6L14 6l6 5"/>',
+  mountain: '<path d="M2 20l7-12 4 6.5 3-4.5 6 10z"/><path d="M7.5 10.5l1.5 1 1.5-1"/>',
+  spa: '<path d="M12 20c-4.5-2-7-5.5-7-9.5 3 0 5.5 1.5 7 4 1.5-2.5 4-4 7-4 0 4-2.5 7.5-7 9.5z"/><path d="M12 14.5c-1-2.5-1-5.5 0-9.5 1 4 1 7 0 9.5z"/>',
   quote: '<path d="M5 18c3-1 4-3.5 4-7H5V6h5v5c0 4.5-1.7 7-5 8zM14 18c3-1 4-3.5 4-7h-4V6h5v5c0 4.5-1.7 7-5 8z"/>',
 };
 const WX_LABEL = { sun: 'Sonnig', cloudsun: 'Heiter / wolkig', cloud: 'Bedeckt', rain: 'Regen', snow: 'Schnee', storm: 'Gewitter' };
 const icon = (n, size = '5mm', sw = 1.4) =>
   `<svg class="ic" viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${ICONS[n] || ICONS.cloud}</svg>`;
+// Symbol für Bausteine ohne Foto
+const PH_ICONS = { bike: 'Rad', hike: 'Wandern', boot: 'Schiff', mountain: 'Berg', ski: 'Ski', sled: 'Rodeln', skate: 'Eislauf', snow: 'Winter', castle: 'Schloss/Burg', town: 'Stadt', mine: 'Bergwerk', cable: 'Seilbahn', gorge: 'Klamm/Wasserfall', dino: 'Dino/Familie', lake: 'See', spa: 'SPA', calendar: 'Termin' };
+function tipIcon(t) {
+  if (t.icon && ICONS[t.icon]) return t.icon;
+  const s = `${t.title} ${t.kicker}`.toLowerCase();
+  const kw = [[/mtb|rad|bike/, 'bike'], [/langlauf|ski/, 'ski'], [/rodel/, 'sled'], [/eislauf/, 'skate'], [/schloss|festung|burg/, 'castle'], [/see\b|insel/, 'lake'], [/klamm/, 'gorge'], [/bahn/, 'cable'], [/trimm|wander|tour/, 'hike']];
+  return (kw.find(([r]) => r.test(s)) || [0, { spa: 'spa', termin: 'calendar', ausflug: 'mountain', aktiv: 'hike' }[t.cat] || 'mountain'])[1];
+}
+function placeholder(t) {
+  return `<div class="ph im"><svg viewBox="0 0 200 80" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <path d="M0 68 L22 50 L34 58 L58 34 L74 48 L92 30 L112 52 L128 40 L150 60 L170 44 L200 64" fill="none" stroke="currentColor" stroke-width=".5" opacity=".35"/>
+    <path d="M0 76 L30 62 L52 70 L80 54 L104 66 L132 56 L160 70 L184 60 L200 70" fill="none" stroke="currentColor" stroke-width=".5" opacity=".6"/>
+    <circle cx="100" cy="34" r="17" fill="#fff" stroke="currentColor" stroke-width=".6"/>
+    <svg x="89" y="23" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round">${ICONS[tipIcon(t)]}</svg></svg></div>`;
+}
 function factIcon(label) {
   const l = label.toLowerCase();
   const map = [['termin', 'calendar'], ['date', 'calendar'], ['treffpunkt', 'pin'], ['meeting', 'pin'], ['teilnahme', 'ticket'], ['participation', 'ticket'],
@@ -1096,7 +1127,7 @@ function renderBack(guide) {
   const art = id => {
     const a = tip(id); if (!a) return '<div class="art"></div>';
     const facts = (a.facts || []).map(([l, v]) => `<div>${icon(factIcon(l), '3.6mm')}<span>${E(l)}: <b>${E(v)}</b></span></div>`).join('');
-    return `<div class="art"><div class="kick">${E(a.kicker)}</div><h2>${E(a.title)}</h2>${a.img ? `<img class="cover im" src="${src(a.img)}">` : ''}<p>${E(a.text)}</p><div class="facts">${facts}</div></div>`;
+    return `<div class="art"><div class="kick">${E(a.kicker)}</div><h2>${E(a.title)}</h2>${a.img ? `<img class="cover im" src="${src(a.img)}">` : placeholder(a)}<p>${E(a.text)}</p><div class="facts">${facts}</div></div>`;
   };
   const G = S.gm, SP = S.special;
   const band = three
@@ -1279,7 +1310,7 @@ let editId = null;
 function openTip(id) {
   editId = id; const t = tip(id) || { id: uid(), kicker: '', title: '', text: '', facts: [], img: '', cat: 'aktiv', season: 'ganzjährig', months: ALL12, indoor: false };
   editId = t.id; const f = $('#tipform');
-  f.kicker.value = t.kicker; f.title.value = t.title; f.text.value = t.text; f.cat.value = t.cat; setMonths(monthsOf(t)); f.indoor.checked = !!t.indoor;
+  f.kicker.value = t.kicker; f.title.value = t.title; f.text.value = t.text; f.cat.value = t.cat; setMonths(monthsOf(t)); f.icon.innerHTML = '<option value="">automatisch</option>' + Object.entries(PH_ICONS).map(([k, l]) => `<option value="${k}"${k === t.icon ? ' selected' : ''}>${l}</option>`).join(''); f.indoor.checked = !!t.indoor;
   f.facts.value = (t.facts || []).map(([l, v]) => `${l}: ${v}`).join('\n');
   const en = t.en || {}; f.kicker_en.value = en.kicker || ''; f.title_en.value = en.title || ''; f.text_en.value = en.text || '';
   f.facts_en.value = (en.facts || []).map(([l, v]) => `${l}: ${v}`).join('\n');
@@ -1292,7 +1323,7 @@ const getMonths = () => $$('#tipmonths input').filter(c => c.checked).map(c => +
 const parseFacts = s => s.split('\n').map(l => l.trim()).filter(Boolean).map(l => { const i = l.indexOf(':'); return i > 0 ? [l.slice(0, i).trim(), l.slice(i + 1).trim()] : ['Info', l]; });
 function saveTip() {
   const f = $('#tipform');
-  const t = { id: editId, kicker: f.kicker.value.trim(), title: f.title.value.trim(), text: f.text.value.trim(), cat: f.cat.value, months: getMonths(), indoor: f.indoor.checked,
+  const t = { id: editId, kicker: f.kicker.value.trim(), title: f.title.value.trim(), text: f.text.value.trim(), cat: f.cat.value, months: getMonths(), indoor: f.indoor.checked, icon: f.icon.value || undefined,
     facts: parseFacts(f.facts.value), img: $('#tipimg').dataset.src || '' };
   const en = { kicker: f.kicker_en.value.trim(), title: f.title_en.value.trim(), text: f.text_en.value.trim(), facts: parseFacts(f.facts_en.value) };
   if (en.title || en.text) t.en = en;
@@ -1425,6 +1456,7 @@ async function init() {
     if (act === 'savetip') saveTip();
     if (act === 'deltip') delTip();
     if (act === 'closetip') $('#dlg').close();
+    if (act === 'tipimgdel') { $('#tipimg').removeAttribute('src'); $('#tipimg').dataset.src = ''; }
     if (act === 'tipimg') { const f = await pickFile(); if (f) { const d = await readImage(f); $('#tipimg').src = d; $('#tipimg').dataset.src = d; } }
     if (act === 'newhero') { const f = await pickFile(); if (f) { const id = uid(); S.lib.heroes.push({ id, name: f.name.replace(/\.[^.]+$/, ''), img: await readImage(f), season: 'ganzjährig' }); S.day.heroId = id; fillLib(); save(); render(); } }
     if (act === 'specialimg') { const f = await pickFile(); if (f) { S.special.img = await readImage(f, 1000); save(); render(); } }
