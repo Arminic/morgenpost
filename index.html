@@ -139,6 +139,14 @@ body.online .localonly{display:none}
 .pg .dish span{display:block;font-size:calc(7.2pt*var(--s,1));color:var(--mute)}
 .pg .three .dish b{font-size:calc(10.6pt*var(--s,1))}.pg .three .dish span{font-size:calc(6.9pt*var(--s,1))}
 .pg .dish b,.pg .dish span{text-wrap:balance}
+/* Halbpension: drei Tage nebeneinander, kompakter Satz */
+.pg .low.days>.menu{padding:0 2.6mm}
+.pg .low.days .menu h3 small{text-transform:uppercase}
+.pg .low.days .menu h3{font-size:13.5pt;padding-bottom:1.1mm;margin-bottom:1.6mm}
+.pg .low.days .dish b{font-size:calc(10pt*var(--s,1));line-height:1.1}
+.pg .low.days .dish span{font-size:calc(6.6pt*var(--s,1));line-height:1.3}
+.pg .low.days .cs{margin:calc(1.3mm*var(--s,1)) auto}
+.pg .low.days .or{font-size:calc(7.6pt*var(--s,1));margin:0;line-height:1.1}
 .pg .cs{width:9mm;height:0;border-top:.6pt solid var(--gold);margin:calc(1.8mm*var(--s,1)) auto}
 .pg .or{font:500 italic calc(9pt*var(--s,1)) Cormorant;color:var(--gold);margin:.3mm 0}
 .pg .side{border-left:.5pt solid var(--line);padding-left:5mm}
@@ -238,9 +246,8 @@ body.online .localonly{display:none}
       <div class="card"><h4>Menü 3</h4><input data-k="day.menus.2.name" placeholder="leer lassen = nur 2 Menüs"><textarea data-k="day.menus.2.raw" rows="14" style="margin-top:6px"></textarea></div>
       <div class="row2"><button class="sm" data-act="hpapply">Wochenmenü für dieses Datum einsetzen</button><button class="sm" data-act="newday">Menütexte leeren</button></div>
       <div class="card" style="margin-top:14px"><h4>Wochenmenü Halbpension (Mo–So)</h4>
-        <p class="hint">Jede neue Ausgabe bekommt automatisch die drei Menüs ihres Wochentags: Fleisch · Fisch · Vegetarisch, je Vorspeise, Zwischengang, Hauptgang, Dessert. Änderungen am Wochenplan gelten für künftige Ausgaben; für einen einzelnen Tag oben direkt im Menütext ändern.</p>
+        <p class="hint">Jede Ausgabe zeigt die Halbpensions-Menüs von heute, morgen und übermorgen (Montagsausgabe: Mo · Di · Mi). Je Tag: Vorspeise, Zwischengang, Hauptgang (Fleisch oder Fisch oder vegetarisch), Dessert. Änderungen am Wochenplan gelten für künftige Ausgaben; für einen einzelnen Tag oben direkt im Menütext ändern.</p>
         <label class="toggle"><input type="checkbox" data-k="hp.on"> neue Ausgaben automatisch füllen</label>
-        <div class="row3"><div><label>Name Fleisch</label><input data-k="hp.names.0"></div><div><label>Name Fisch</label><input data-k="hp.names.1"></div><div><label>Name Vegetarisch</label><input data-k="hp.names.2"></div></div>
         <label>Erste Zeile jedes Menüs (optional, z. B. Brot)</label><textarea data-k="hp.bread" rows="2" placeholder="leer = keine"></textarea>
         <label>Wochenplan bearbeiten</label>
         <select id="hpday"><option>Mo</option><option>Di</option><option>Mi</option><option>Do</option><option>Fr</option><option>Sa</option><option>So</option></select>
@@ -919,7 +926,7 @@ function makeView(l) {
     return s.split('|').map(x => x.trim()).filter(Boolean).map(word).join(' | ');
   };
   const menu = m => l === 'de' ? m : {
-    name: m.name.trim() ? word(m.name.trim()) : '',
+    ...m, name: m.day ? m.name : m.name.trim() ? word(m.name.trim()) : '',
     raw: String(m.raw || '').split('\n').map(x => { const t = x.trim(); return !t || /^(\*{2,}|-{3,}|—+|oder)$/i.test(t) ? x : line(t); }).join('\n'),
   };
   const tipV = id => {
@@ -1144,10 +1151,12 @@ function parseMenu(raw) {
 }
 
 // ---------------------------------------------------------------- Rendering
-function menuHTML(m, i, L = LBL.de) {
+function menuHTML(m, i, L = LBL.de, l = 'de') {
   const courses = parseMenu(m.raw);
   const body = courses.map(c => c.map(d => `<div class="dish"><b>${E(d.t)}</b><span>${E(d.d)}</span></div>`)
     .join(`<div class="or">${E(L.or)}</div>`)).join('<div class="cs"></div>');
+  if (m.day) { const d = pd(m.day), rel = [L.today, L.tomorrow, L.after][m.rel ?? i];
+    return `<div class="menu"><h3><small>${E(rel)} · ${E(weekDate(m.day, WDS[d.getDay()], l, true))}</small>${E(m.name && m.name !== WD[d.getDay()] ? m.name : wdLong(d, l))}</h3>${body}</div>`; }
   return `<div class="menu"><h3><small>${E(L.menu)} ${i + 1}</small>${E(m.name)}</h3>${body}</div>`;
 }
 // ---------------------------------------------------------------- Wochenmenü Halbpension
@@ -1160,16 +1169,17 @@ const HP_KIND = k => { const s = String(k || '').toUpperCase();
 };
 function hpMenus(date, H = S?.hp) {
   if (!H || !H.on) return null;
-  const day = H.days?.[WDS[pd(date).getDay()]]; if (!day || !day.length) return null;
-  const pick = k => day.filter(c => HP_KIND(c.k) === k && (c.t || '').trim());
-  const dish = c => [c.t.trim(), (c.d || '').trim()].filter(Boolean).join('\n');
-  const build = (vor, main) => {
-    const parts = [H.bread?.trim(), ...vor.map(dish), ...pick('zw').map(dish), ...main.map(dish), ...pick('dessert').map(dish)].filter(Boolean);
-    return parts.join('\n***\n');
-  };
-  const vNv = pick('v_nv').length ? pick('v_nv') : pick('v_veg'), vVeg = pick('v_veg').length ? pick('v_veg') : pick('v_nv');
-  return [[vNv, pick('h_fleisch')], [vNv, pick('h_fisch')], [vVeg, pick('h_veg')]]
-    .map(([v, m], i) => ({ name: H.names?.[i] || '', raw: m.length ? build(v, m) : '' }));
+  // Ausgabe zeigt die Halbpensions-Menüs von heute, morgen und übermorgen (je eine Spalte = ein Tag der Excel)
+  const out = [0, 1, 2].map(k => {
+    const d = addDays(date, k), day = H.days?.[WDS[pd(d).getDay()]] || [];
+    const pick = kind => day.filter(c => HP_KIND(c.k) === kind && (c.t || '').trim());
+    const dish = c => [c.t.trim(), (c.d || '').trim()].filter(Boolean).join('\n');
+    const course = list => list.map(dish).join('\noder\n');
+    const raw = [H.bread?.trim(), course([...pick('v_veg'), ...pick('v_nv')]), course(pick('zw')),
+      course([...pick('h_fleisch'), ...pick('h_fisch'), ...pick('h_veg')]), course(pick('dessert'))].filter(Boolean).join('\n***\n');
+    return { name: WD[pd(d).getDay()], day: d, rel: k, raw: day.length ? raw : '' };
+  });
+  return out.some(m => m.raw) ? out : null;
 }
 function applyHP(ask) {
   const m = hpMenus(S.day.date);
@@ -1243,8 +1253,8 @@ function heroImg() { const h = S.lib.heroes.find(x => x.id === S.day.heroId) || 
 function tip(id) { return S.lib.tips.find(t => t.id === id); }
 
 // Datum eines Wochentags in der Woche der Ausgabe (Mo–So), kurz: 16.11. / 16/11 / 16-11
-function weekDate(date, d, l) {
-  const x = pd(date), mon = addDays(date, -((x.getDay() + 6) % 7)), y = pd(addDays(mon, WEEK.indexOf(d)));
+function weekDate(date, d, l, exact) {
+  const x = pd(date), mon = addDays(date, -((x.getDay() + 6) % 7)), y = exact ? x : pd(addDays(mon, WEEK.indexOf(d)));
   const dd = y.getDate(), mm = y.getMonth() + 1;
   return l === 'de' || l === 'bs' ? `${dd}.${mm}.` : l === 'nl' ? `${dd}-${mm}` : `${dd}/${mm}`;
 }
@@ -1287,7 +1297,7 @@ function renderFront(guide, V = makeView('de')) {
   </div>
   <div class="half bottom" data-area="Vorderseite unten (Menüs)">
     <div class="spa"><div class="hd"><h2>${E(V.spa.title)}</h2><p>${E(V.spa.intro)}<br>${E(V.spa.note)}</p><img src="${src(S.assets.qrSpa)}"></div><div class="week">${week}</div></div>
-    <div class="low${three ? ' three' : menus.length === 1 ? ' one' : ''}">${menus.map((m, i) => menuHTML(m, i, L)).join('')}${three ? '' : side}</div>
+    <div class="low${three ? ' three' : menus.length === 1 ? ' one' : ''}${menus.some(m => m.day) ? ' days' : ''}">${menus.map((m, i) => menuHTML(m, i, L, l)).join('')}${three ? '' : side}</div>
   </div>
   <div class="foot"><span>${E(st.web)}</span><img src="${src(S.assets.rc)}"><span>${E(st.masthead)} ${E(L.no)} ${dayOfYear(D.date)}</span></div></section>`;
 }
@@ -1332,7 +1342,8 @@ function fit(pages) {
   const warn = [];
   $$('.half', pages).forEach(h => {
     let s = 1; h.style.setProperty('--s', s);
-    while (h.scrollHeight > h.clientHeight + 1 && s > 0.8) { s = +(s - 0.02).toFixed(2); h.style.setProperty('--s', s); }
+    const min = h.querySelector('.low.days') ? 0.72 : 0.8;
+    while (h.scrollHeight > h.clientHeight + 1 && s > min) { s = +(s - 0.02).toFixed(2); h.style.setProperty('--s', s); }
     if (h.scrollHeight > h.clientHeight + 1) warn.push(h.dataset.area);
     else if (s < 1) h.title = `Schrift automatisch auf ${Math.round(s * 100)} % verkleinert`;
   });
