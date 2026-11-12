@@ -121,6 +121,8 @@ body.online .localonly{display:none}
 .pg .week{display:grid;grid-template-columns:repeat(7,1fr);gap:1.5mm}
 .pg .week>div{background:#fff;padding:1.4mm 1.8mm;min-height:12mm;font-size:6.9pt;line-height:1.4}
 .pg .week .d{font:700 6.4pt Lato;letter-spacing:.15em;margin-bottom:.8mm;color:var(--mute)}
+.pg .week .tt{font:700 5.4pt Lato;letter-spacing:.18em;color:var(--gold);margin:-.6mm 0 .8mm}
+.pg .week .d{display:flex;flex-wrap:nowrap;justify-content:space-between;align-items:baseline;column-gap:1mm}.pg .week .d small{font-weight:300;letter-spacing:.02em;font-size:6pt}
 .pg .week .today{outline:1pt solid var(--gold)}
 .pg .week .today .d{color:var(--gold)}
 .pg .week .e b{font-weight:700}
@@ -1240,6 +1242,12 @@ async function hpImport() {
 function heroImg() { const h = S.lib.heroes.find(x => x.id === S.day.heroId) || S.lib.heroes[0]; return h ? src(h.img) : ''; }
 function tip(id) { return S.lib.tips.find(t => t.id === id); }
 
+// Datum eines Wochentags in der Woche der Ausgabe (Mo–So), kurz: 16.11. / 16/11 / 16-11
+function weekDate(date, d, l) {
+  const x = pd(date), mon = addDays(date, -((x.getDay() + 6) % 7)), y = pd(addDays(mon, WEEK.indexOf(d)));
+  const dd = y.getDate(), mm = y.getMonth() + 1;
+  return l === 'de' || l === 'bs' ? `${dd}.${mm}.` : l === 'nl' ? `${dd}-${mm}` : `${dd}/${mm}`;
+}
 function renderFront(guide, V = makeView('de')) {
   const D = S.day, st = V.st, L = V.L, l = V.l, date = pd(D.date), dl = dayMonthYear(date, l);
   const wd = wdLong(date, l), today = WDS[date.getDay()];
@@ -1259,7 +1267,7 @@ function renderFront(guide, V = makeView('de')) {
   const week = WEEK.map(d => {
     const ev = String(V.spa.week[d] || '').split(/[;\n]/).map(x => x.trim()).filter(Boolean)
       .map(x => { const m = x.match(/^(\d{1,2}[:.]\d{2})\s+(.*)$/); return m ? `<div class="e"><b>${E(m[1].replace('.', ':'))}</b> ${E(m[2])}</div>` : `<div class="e">${E(x)}</div>`; }).join('');
-    return `<div class="${d === today ? 'today' : ''}"><div class="d">${wdShort(WDS.indexOf(d), l)}${d === today ? ' · ' + E(L.todayTag) : ''}</div>${ev || `<div class="none">${E(V.spa.empty)}</div>`}</div>`;
+    return `<div class="${d === today ? 'today' : ''}"><div class="d"><span>${wdShort(WDS.indexOf(d), l)}</span><small>${weekDate(D.date, d, l)}</small></div>${d === today ? `<div class="tt">${E(L.todayTag)}</div>` : ''}${ev || `<div class="none">${E(V.spa.empty)}</div>`}</div>`;
   }).join('');
   const Q = V.quote, SP = V.special;
   const side = `<div class="side"><div class="quote">${icon('quote', '6mm', 1.1)}${E(Q.text)}<small>— ${E(Q.author)}</small></div>
