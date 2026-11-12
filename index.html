@@ -313,11 +313,14 @@ body.online .localonly{display:none}
     <div class="row2"><div><label>Rubrik (klein über dem Titel)</label><input name="kicker" placeholder="z. B. Wanderung"></div><div><label>Titel</label><input name="title"></div></div>
     <label>Text</label><textarea name="text" class="prose" rows="6"></textarea>
     <label>Eckdaten (je Zeile „Bezeichnung: Wert“)</label><textarea name="facts" rows="4" placeholder="Distanz: 5,0 km&#10;Dauer: 1,5 Std."></textarea>
-    <div class="row3">
+    <div class="row2">
       <div><label>Kategorie</label><select name="cat"><option value="aktiv">aktiv (Wandern, Rad)</option><option value="ausflug">Ausflug</option><option value="spa">SPA</option><option value="service">Service</option><option value="termin">Termin (nur von Hand)</option></select></div>
-      <div><label>Saison</label><select name="season"><option>ganzjährig</option><option>sommer</option><option>winter</option></select></div>
       <div><label>&nbsp;</label><label class="toggle" style="text-transform:none;letter-spacing:0;font-weight:400;margin:6px 0"><input type="checkbox" name="indoor"> auch bei Schlechtwetter</label></div>
     </div>
+    <label>Passt in diesen Monaten</label>
+    <div id="tipmonths" style="display:flex;flex-wrap:wrap;gap:4px 10px"><label class="toggle" style="text-transform:none;letter-spacing:0;font-weight:400;margin:0"><input type="checkbox" value="1"> Jan</label><label class="toggle" style="text-transform:none;letter-spacing:0;font-weight:400;margin:0"><input type="checkbox" value="2"> Feb</label><label class="toggle" style="text-transform:none;letter-spacing:0;font-weight:400;margin:0"><input type="checkbox" value="3"> Mär</label><label class="toggle" style="text-transform:none;letter-spacing:0;font-weight:400;margin:0"><input type="checkbox" value="4"> Apr</label><label class="toggle" style="text-transform:none;letter-spacing:0;font-weight:400;margin:0"><input type="checkbox" value="5"> Mai</label><label class="toggle" style="text-transform:none;letter-spacing:0;font-weight:400;margin:0"><input type="checkbox" value="6"> Jun</label><label class="toggle" style="text-transform:none;letter-spacing:0;font-weight:400;margin:0"><input type="checkbox" value="7"> Jul</label><label class="toggle" style="text-transform:none;letter-spacing:0;font-weight:400;margin:0"><input type="checkbox" value="8"> Aug</label><label class="toggle" style="text-transform:none;letter-spacing:0;font-weight:400;margin:0"><input type="checkbox" value="9"> Sep</label><label class="toggle" style="text-transform:none;letter-spacing:0;font-weight:400;margin:0"><input type="checkbox" value="10"> Okt</label><label class="toggle" style="text-transform:none;letter-spacing:0;font-weight:400;margin:0"><input type="checkbox" value="11"> Nov</label><label class="toggle" style="text-transform:none;letter-spacing:0;font-weight:400;margin:0"><input type="checkbox" value="12"> Dez</label></div>
+    <div style="display:flex;gap:6px;margin-top:6px"><button class="sm" type="button" data-act="mon:1-12">ganzjährig</button><button class="sm" type="button" data-act="mon:5-10">Sommer Mai–Okt</button>
+      <button class="sm" type="button" data-act="mon:4-11">ohne Schnee Apr–Nov</button><button class="sm" type="button" data-act="mon:12-3">Winter Dez–Mär</button></div>
     <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700">Englisch (Morning Mail)</summary>
       <div class="row2"><div><label>Rubrik EN</label><input name="kicker_en"></div><div><label>Titel EN</label><input name="title_en"></div></div>
       <label>Text EN</label><textarea name="text_en" class="prose" rows="5"></textarea>
@@ -834,6 +837,24 @@ const pd = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y,
 const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const addDays = (s, n) => { const d = pd(s); d.setDate(d.getDate() + n); return iso(d); };
 const dayOfYear = s => { const d = pd(s); return Math.round((d - new Date(d.getFullYear(), 0, 1)) / 864e5) + 1; };
+// Saison der Bausteine je Monat (1–12). Ohne eigene Angabe: abgestimmte Vorgabe je Baustein, sonst aus dem alten Feld „season“
+const MON_S = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+const ALL12 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], rng = (a, b) => ALL12.filter(m => a <= b ? m >= a && m <= b : m >= a || m <= b);
+const MONTHS_DEFAULT = {
+  winkl: rng(5, 10), koenigssee: rng(4, 10), malerwinkl: rng(4, 10), talrunde: rng(4, 11),
+  hutzenalm_mtb: rng(5, 10), klausenberg_mtb: rng(5, 10), hemmersuppenalm_mtb: rng(5, 10), winklmoos_mtb46: rng(6, 10),
+  wetterkreuz: rng(4, 11), duerrnbachhorn: rng(6, 10), trimm_dich: rng(4, 11), radverleih: rng(4, 10), fraueninsel: rng(4, 10),
+  t_kapellensteig: rng(5, 10), t_ebike_kaiserwinkl: rng(5, 10), t_chiemseeblick: rng(5, 10),
+};
+const monthsOf = t => t.months?.length ? t.months : MONTHS_DEFAULT[t.id] || (t.season === 'sommer' ? rng(4, 10) : t.season === 'winter' ? rng(12, 3) : ALL12);
+const inSeason = (t, date) => monthsOf(t).includes(pd(date).getMonth() + 1);
+function monthsLabel(ms) {
+  const s = [...new Set(ms)].sort((a, b) => a - b); if (s.length >= 12) return 'ganzjährig'; if (!s.length) return 'nie';
+  const start = s.find(m => !s.includes(m === 1 ? 12 : m - 1));
+  if (start !== undefined) { let e = start; while (s.includes(e === 12 ? 1 : e + 1) && (e === 12 ? 1 : e + 1) !== start) e = e === 12 ? 1 : e + 1;
+    if (rng(start, e).length === s.length) return `${MON_S[start - 1]}–${MON_S[e - 1]}`; }
+  return s.map(m => MON_S[m - 1]).join(', ');
+}
 const seasonOf = s => { const m = pd(s).getMonth() + 1; return (m >= 4 && m <= 10) ? 'sommer' : 'winter'; };
 const get = (o, p) => p.split('.').reduce((a, k) => a?.[k], o);
 const set = (o, p, v) => { const ks = p.split('.'); const l = ks.pop(); ks.reduce((a, k) => a[k] ??= {}, o)[l] = v; };
@@ -1119,7 +1140,9 @@ function fit(pages) {
     v.style.height = ((c.bottom - h.bottom) / mm - 3) + 'mm';
   });
   const term = S.day.back.map(tip).filter(t => t && t.cat === 'termin');
+  const off = S.day.back.map(tip).filter(t => t && !inSeason(t, S.day.date));
   if (warn.length) status('Zu viel Text – bitte kürzen: ' + warn.join(', '), true);
+  else if (off.length) status('Passt nicht zur Jahreszeit (' + MON_S[pd(S.day.date).getMonth()] + '): ' + off.map(t => t.title).join(', ') + ' – bitte anderen Baustein wählen oder Saison im Baustein anpassen.', true);
   else if (term.length) status('Termin auf der Rückseite – bitte Wochentag und Uhrzeit prüfen: ' + term.map(t => t.title).join(', '));
   else if (!S.day.weather) status('Noch keine Wetterdaten – „Wetter laden“ klicken oder im Reiter „Tag“ eintragen.');
   else status('');
@@ -1159,7 +1182,7 @@ const lastUsed = id => S.log[id] || '0000-00-00';
 function rank(list) { return list.map(x => [lastUsed(x.id), Math.random(), x]).sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] - b[1]).map(x => x[2]); }
 function suggestBack() {
   const se = seasonOf(S.day.date), bad = ['rain', 'snow', 'storm'].includes(S.day.weather?.days?.[0]?.icon);
-  const ok = S.lib.tips.filter(t => t.cat !== 'termin' && (t.season === 'ganzjährig' || t.season === se));
+  const ok = S.lib.tips.filter(t => t.cat !== 'termin' && inSeason(t, S.day.date));
   let out = rank(ok.filter(t => t.cat !== 'spa' && (!bad || t.indoor || t.cat === 'ausflug'))).slice(0, 2);
   if (out.length < 2) out = out.concat(rank(ok.filter(t => t.cat !== 'spa' && !out.includes(t)))).slice(0, 2);
   let low = rank(ok.filter(t => t.cat === 'spa')).slice(0, 2);
@@ -1190,7 +1213,7 @@ async function changeDate(v) {
     await Remote.flush(); await Remote.openDay(v); fillAll(); status(''); render(); return;
   }
   S.day.date = v; S.day.weather = null; const hm = hpMenus(v); if (hm) { S.day.menus = hm; bindAll(); }
-  fillWeatherForm(); suggestHero(); loadWeather(); save(); render();
+  fillWeatherForm(); suggestHero(); fillLib(); loadWeather(); save(); render();
 }
 
 // ---------------------------------------------------------------- Formulare
@@ -1234,12 +1257,12 @@ function fillHeroes() {
   $('#heroes').innerHTML = S.lib.heroes.map(h => `<div class="h${h.id === S.day.heroId ? ' on' : ''}" data-hero="${h.id}"><img src="${src(h.img)}"><span>${E(h.name)}</span></div>`).join('');
 }
 function fillBackForm() {
-  const opts = sel => '<option value="">– leer –</option>' + S.lib.tips.map(t => `<option value="${t.id}"${t.id === sel ? ' selected' : ''}>${E(t.title)} (${t.cat}, ${t.season})</option>`).join('');
+  const opts = sel => '<option value="">– leer –</option>' + S.lib.tips.map(t => `<option value="${t.id}"${t.id === sel ? ' selected' : ''}>${E(t.title)} (${t.cat}, ${monthsLabel(monthsOf(t))})${inSeason(t, S.day.date) ? '' : ' – außerhalb der Saison'}</option>`).join('');
   $$('[data-slot]').forEach(s => s.innerHTML = opts(S.day.back[+s.dataset.slot]));
 }
 function fillLib() {
   $('#libtips').innerHTML = S.lib.tips.map(t => `<div class="libitem"><img src="${src(t.img)}"><div><div class="t">${E(t.title)}</div>
-    <div class="m"><span class="tag">${t.cat}</span><span class="tag">${t.season}</span>${t.indoor ? '<span class="tag">Schlechtwetter</span>' : ''}${t.en ? '<span class="tag">EN</span>' : ''} zuletzt: ${S.log[t.id] ? pd(S.log[t.id]).toLocaleDateString('de-DE') : '–'}</div></div>
+    <div class="m"><span class="tag">${t.cat}</span><span class="tag"${inSeason(t, S.day.date) ? '' : ' style="opacity:.55" title="passt nicht zum gewählten Datum"'}>${monthsLabel(monthsOf(t))}</span>${t.indoor ? '<span class="tag">Schlechtwetter</span>' : ''}${t.en ? '<span class="tag">EN</span>' : ''} zuletzt: ${S.log[t.id] ? pd(S.log[t.id]).toLocaleDateString('de-DE') : '–'}</div></div>
     <button class="sm" data-edit="${t.id}">Bearbeiten</button></div>`).join('');
   $('#libheroes').innerHTML = S.lib.heroes.map(h => `<div class="libitem"><img src="${src(h.img)}"><div><input data-hname="${h.id}" value="${E(h.name)}"></div>
     <div><select data-hseason="${h.id}">${['ganzjährig', 'sommer', 'winter'].map(x => `<option${x === h.season ? ' selected' : ''}>${x}</option>`).join('')}</select>
@@ -1254,9 +1277,9 @@ function fillAll() { bindAll(); fillWeatherForm(); fillHeroes(); fillLib(); fill
 // ---------------------------------------------------------------- Bausteine bearbeiten
 let editId = null;
 function openTip(id) {
-  editId = id; const t = tip(id) || { id: uid(), kicker: '', title: '', text: '', facts: [], img: '', cat: 'aktiv', season: 'ganzjährig', indoor: false };
+  editId = id; const t = tip(id) || { id: uid(), kicker: '', title: '', text: '', facts: [], img: '', cat: 'aktiv', season: 'ganzjährig', months: ALL12, indoor: false };
   editId = t.id; const f = $('#tipform');
-  f.kicker.value = t.kicker; f.title.value = t.title; f.text.value = t.text; f.cat.value = t.cat; f.season.value = t.season; f.indoor.checked = !!t.indoor;
+  f.kicker.value = t.kicker; f.title.value = t.title; f.text.value = t.text; f.cat.value = t.cat; setMonths(monthsOf(t)); f.indoor.checked = !!t.indoor;
   f.facts.value = (t.facts || []).map(([l, v]) => `${l}: ${v}`).join('\n');
   const en = t.en || {}; f.kicker_en.value = en.kicker || ''; f.title_en.value = en.title || ''; f.text_en.value = en.text || '';
   f.facts_en.value = (en.facts || []).map(([l, v]) => `${l}: ${v}`).join('\n');
@@ -1264,14 +1287,18 @@ function openTip(id) {
   $('#tipdel').style.display = tip(id) ? '' : 'none';
   $('#dlg').showModal();
 }
+const setMonths = ms => $$('#tipmonths input').forEach(c => c.checked = ms.includes(+c.value));
+const getMonths = () => $$('#tipmonths input').filter(c => c.checked).map(c => +c.value);
 const parseFacts = s => s.split('\n').map(l => l.trim()).filter(Boolean).map(l => { const i = l.indexOf(':'); return i > 0 ? [l.slice(0, i).trim(), l.slice(i + 1).trim()] : ['Info', l]; });
 function saveTip() {
   const f = $('#tipform');
-  const t = { id: editId, kicker: f.kicker.value.trim(), title: f.title.value.trim(), text: f.text.value.trim(), cat: f.cat.value, season: f.season.value, indoor: f.indoor.checked,
+  const t = { id: editId, kicker: f.kicker.value.trim(), title: f.title.value.trim(), text: f.text.value.trim(), cat: f.cat.value, months: getMonths(), indoor: f.indoor.checked,
     facts: parseFacts(f.facts.value), img: $('#tipimg').dataset.src || '' };
   const en = { kicker: f.kicker_en.value.trim(), title: f.title_en.value.trim(), text: f.text_en.value.trim(), facts: parseFacts(f.facts_en.value) };
   if (en.title || en.text) t.en = en;
   if (!t.title) { alert('Bitte einen Titel eintragen.'); return; }
+  if (!t.months.length) { alert('Bitte mindestens einen Monat wählen.'); return; }
+  t.season = t.months.length === 12 ? 'ganzjährig' : t.months.every(m => m >= 4 && m <= 10) ? 'sommer' : t.months.every(m => m >= 11 || m <= 3) ? 'winter' : 'ganzjährig';
   const i = S.lib.tips.findIndex(x => x.id === editId);
   if (i >= 0) S.lib.tips[i] = t; else S.lib.tips.push(t);
   $('#dlg').close(); fillLib(); save(); render();
@@ -1407,6 +1434,7 @@ async function init() {
     if (act === 'import') importData();
     if (act === 'libimport') libImport();
     if (act === 'hpimport') hpImport();
+    if (act.startsWith('mon:')) { const [a, b] = act.slice(4).split('-').map(Number); setMonths(rng(a, b)); }
     if (act === 'hpapply') applyHP(true);
     if (act === 'newday') { if (confirm('Menüs leeren und für die nächste Ausgabe vorbereiten?')) { S.day.menus.forEach(m => m.raw = ''); bindAll(); save(); render(); } }
     if (act === 'reset') { if (confirm('Alle Daten auf den Auslieferungszustand zurücksetzen? Vorher am besten exportieren.')) { S = freshState(); S.ui = { guide: true, zoom: 0.8 }; fillAll(); save(); render(); } }
