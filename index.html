@@ -1392,7 +1392,7 @@ function renderFront(guide, V = makeView('de')) {
     <div class="low${three ? ' three' : menus.length === 1 ? ' one' : ''}${menus.some(m => m.day || m.sub) ? ' days' : ''}">${menus.map((m, i) => menuHTML(m, i, L, l)).join('')}${three ? '' : side}</div>
     ${menus.some(m => m.sub) && V.hpnote ? `<div class="hpnote">${E(V.hpnote)}</div>` : ''}
   </div>
-  <div class="foot"><span>${E(st.web)}</span><img src="${src(S.assets.rc)}"><span>${E(st.masthead)} ${E(L.no)} ${dayOfYear(D.date)}</span></div></section>`;
+  <div class="foot"><span>${E(st.web)}</span><img src="${src(S.assets.rc)}"><span></span></div></section>`;
 }
 
 function renderBack(guide, V = makeView('de')) {
@@ -1411,12 +1411,12 @@ function renderBack(guide, V = makeView('de')) {
   const B = D.back;
   return `<section class="pg">${guide ? '<div class="fold"><span>FALZ</span></div>' : ''}
   <div class="half top" data-area="Rückseite oben">
-    <div class="p2head"><span></span><span>${E(st.p2tag)}</span><span>${dl}</span></div>
+    <div class="p2head"><span></span><span>${E(st.p2tag)}</span><span></span></div>
     <div class="cols">${art(B[0])}${art(B[1])}</div></div>
   <div class="half bottom" data-area="Rückseite unten" style="display:flex;flex-direction:column">
     <div class="cols" style="flex:1">${art(B[2])}${art(B[3])}</div>${band}</div>
   <div class="hline"></div><div class="vline"></div>
-  <div class="foot"><span>${E(st.web)}</span><img src="${src(S.assets.rc)}"><span>${E(st.masthead)} ${E(L.no)} ${dayOfYear(D.date)}</span></div></section>`;
+  <div class="foot"><span>${E(st.web)}</span><img src="${src(S.assets.rc)}"><span></span></div></section>`;
 }
 
 let renderT, lastView = null;
