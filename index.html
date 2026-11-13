@@ -102,17 +102,17 @@ body.online .localonly{display:none}
 .pg .hero .sig{font:500 italic 11.5pt Cormorant;color:var(--gold);margin-top:2.5mm}
 .pg .hero .q{margin-top:3mm;padding-top:2.5mm;border-top:.5pt solid var(--line);font:500 italic 11pt/1.25 Cormorant}
 .pg .hero .q small{display:block;font:700 6pt Lato;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-top:1mm;font-style:normal}
-.pg .wx{display:grid;grid-template-columns:1.55fr 1fr 1fr 1fr;border-top:.5pt solid var(--line);border-bottom:.5pt solid var(--line);margin-top:4mm}
-.pg .wx>div{padding:4.5mm 4mm;border-right:.5pt solid var(--line)}
-.pg .wx>div:last-child{border:0}
+.pg .wx{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:.5pt solid var(--line);border-bottom:.5pt solid var(--line);margin-top:4mm}
+.pg .wx>div{padding:4mm 3mm;border-right:.5pt solid var(--line);text-align:center;display:flex;flex-direction:column;justify-content:center}
+.pg .wx>div:last-child{border:0}.pg .wx>div:first-child{padding-left:1mm;padding-right:1mm}.pg .wx>div:first-child .row{gap:2mm}
 .pg .wx .ic{color:var(--gold)}
 .pg .wx .lab{font:700 6.6pt Lato;letter-spacing:.2em;text-transform:uppercase;color:var(--mute);margin-bottom:2mm}
 .pg .wx .tm{font:600 24pt/1 Cormorant;white-space:nowrap}.pg .wx .tm small{font:300 10pt Lato;color:var(--mute)}
-.pg .wx .row{display:flex;align-items:center;gap:2.5mm}
-.pg .wx .parts{display:flex;gap:2.5mm;margin-left:auto;font-size:6.6pt;text-align:center;color:var(--mute)}
+.pg .wx .row{display:flex;align-items:center;justify-content:center;gap:2.5mm}
+.pg .wx .parts{display:flex;gap:2mm;margin-left:1mm;font-size:6.6pt;text-align:center;color:var(--mute)}
 .pg .wx .parts .ic{display:block;margin:0 auto .6mm}
-.pg .wx .sun{font-size:8pt;line-height:2.1}
-.pg .wx .sun span{display:flex;align-items:center;gap:1.5mm}
+.pg .wx .sun{display:flex;justify-content:center;gap:4mm;font-size:6.8pt;color:var(--mute);margin-top:2mm}
+.pg .wx .sun span{display:flex;align-items:center;gap:1.2mm}.pg .wx .sun b{color:var(--ink);font-weight:700}
 .pg .spa{margin-bottom:4mm;background:var(--paper);padding:2.5mm 4mm 3mm;border-top:1.2pt solid var(--gold)}
 .pg .spa .hd{display:grid;grid-template-columns:auto 1fr auto;gap:5mm;align-items:center;margin-bottom:2mm}
 .pg .spa .hd h2{font-size:15pt;margin:0;white-space:nowrap}
@@ -159,8 +159,8 @@ body.online .localonly{display:none}
  font-size:6.6pt;letter-spacing:.18em;color:var(--mute);text-transform:uppercase}
 .pg .foot img{height:8.5mm;margin:0 auto}
 .pg .foot span:last-child{text-align:right}
-.pg .p2head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.6pt solid var(--ink);padding-bottom:1mm;margin-bottom:5mm}
-.pg .p2head b{font:600 20pt Cormorant}.pg .p2head span{font-size:7pt;letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
+.pg .p2head{display:grid;grid-template-columns:1fr auto 1fr;align-items:baseline;border-bottom:1.6pt solid var(--ink);padding-bottom:1mm;margin-bottom:5mm}
+.pg .p2head b{font:600 20pt Cormorant}.pg .p2head span{text-align:center;padding-left:.18em}.pg .p2head span:last-child{text-align:right}.pg .p2head span{font-size:7pt;letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
 .pg .cols{display:grid;grid-template-columns:1fr 1fr;column-gap:12mm}
 .pg .hline{position:absolute;left:11mm;right:11mm;top:148.5mm;border-top:.5pt solid var(--line)}
 .pg .vline{position:absolute;left:105mm;border-left:.5pt solid var(--line);width:0}
@@ -866,7 +866,7 @@ const LBL = {
     qod: 'Quote of the day', menu: 'MENU', or: 'or', issue: 'Issue no.', no: 'No.', pre: 'Pre-order', mobile: 'For smartphone & tablet', todayTag: 'TODAY', q: ['“', '”'] },
   fr: { today: 'Aujourd’hui', tomorrow: 'Demain', after: 'Après-demain', parts: ['Matin', 'Midi', 'Soir'], sun: 'Soleil', rise: 'Lever', set: 'Coucher',
     qod: 'Citation du jour', menu: 'MENU', or: 'ou', issue: 'Édition n°', no: 'n°', pre: 'Sur commande', mobile: 'Pour smartphone & tablette', todayTag: 'AUJOURD’HUI', q: ['« ', ' »'] },
-  it: { today: 'Oggi', tomorrow: 'Domani', after: 'Dopodomani', parts: ['Mattina', 'Mezzogiorno', 'Sera'], sun: 'Sole', rise: 'Alba', set: 'Tramonto',
+  it: { today: 'Oggi', tomorrow: 'Domani', after: 'Dopodomani', parts: ['Mattina', 'Mezzodì', 'Sera'], sun: 'Sole', rise: 'Alba', set: 'Tramonto',
     qod: 'Frase del giorno', menu: 'MENÙ', or: 'oppure', issue: 'Edizione n.', no: 'n.', pre: 'Su prenotazione', mobile: 'Per smartphone e tablet', todayTag: 'OGGI', q: ['«', '»'] },
   nl: { today: 'Vandaag', tomorrow: 'Morgen', after: 'Overmorgen', parts: ['Ochtend', 'Middag', 'Avond'], sun: 'Zon', rise: 'Opkomst', set: 'Ondergang',
     qod: 'Spreuk van de dag', menu: 'MENU', or: 'of', issue: 'Editie nr.', no: 'nr.', pre: 'Op bestelling', mobile: 'Voor smartphone & tablet', todayTag: 'VANDAAG', q: ['“', '”'] },
@@ -1349,10 +1349,10 @@ function renderFront(guide, V = makeView('de')) {
   }).join('');
   const t0 = W.days[0] || {};
   const wx = `<div class="wx">
-    <div><div class="lab">${E(L.today)} · ${wd}</div><div class="row">${icon(t0.icon || 'cloud', '12mm', 1.1)}<div class="tm">${deg(t0.max)}°<small> / ${deg(t0.min)}°</small></div>
-     <div class="parts">${L.parts.map((x, k) => `<div>${icon(W.parts[k] || 'cloud', '6.5mm', 1.2)}${E(x)}</div>`).join('')}</div></div></div>
-    ${wxDays}
-    <div class="sun"><div class="lab">${E(L.sun)}</div><span>${icon('sunrise', '4.5mm')} ${E(L.rise)} ${E(W.sunrise || '–')}</span><span>${icon('sunset', '4.5mm')} ${E(L.set)} ${E(W.sunset || '–')}</span></div></div>`;
+    <div><div class="lab">${E(L.today)} · ${wd}</div><div class="row">${icon(t0.icon || 'cloud', '10mm', 1.1)}<div class="tm">${deg(t0.max)}°<small> / ${deg(t0.min)}°</small></div>
+     <div class="parts">${L.parts.map((x, k) => `<div>${icon(W.parts[k] || 'cloud', '6.5mm', 1.2)}${E(x)}</div>`).join('')}</div></div>
+     <div class="sun"><span>${icon('sunrise', '4mm')} ${E(L.rise)} <b>${E(W.sunrise || '–')}</b></span><span>${icon('sunset', '4mm')} ${E(L.set)} <b>${E(W.sunset || '–')}</b></span></div></div>
+    ${wxDays}</div>`;
   const week = WEEK.map(d => {
     const ev = String(V.spa.week[d] || '').split(/[;\n]/).map(x => x.trim()).filter(Boolean)
       .map(x => { const m = x.match(/^(\d{1,2}[:.]\d{2})\s+(.*)$/); return m ? `<div class="e"><b>${E(m[1].replace('.', ':'))}</b> ${E(m[2])}</div>` : `<div class="e">${E(x)}</div>`; }).join('');
