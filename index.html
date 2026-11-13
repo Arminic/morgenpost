@@ -94,13 +94,15 @@ body.online .localonly{display:none}
 .pg .rule{border-top:1.6pt solid var(--ink);border-bottom:.5pt solid var(--ink);height:1.4mm;margin-bottom:1.5mm}
 .pg .tagline{display:flex;justify-content:space-between;font-size:6.6pt;letter-spacing:.22em;text-transform:uppercase;color:var(--mute);
  border-bottom:.5pt solid var(--line);padding-bottom:1.5mm;margin-bottom:3.5mm}
-.pg .hero{display:grid;grid-template-columns:100mm 1fr;height:66mm;background:var(--paper);overflow:hidden}
-.pg .hero img{height:66mm;min-height:0}
-.pg .hero .ov{display:flex;flex-direction:column;justify-content:center;padding:0 7mm;border-top:1.2pt solid var(--gold)}
-.pg .hero h1{font:500 italic 21pt/1.05 Cormorant;margin:1.5mm 0 2.5mm}
-.pg .hero p{font-size:8.2pt;color:var(--mute)}
+.pg .hero{display:grid;grid-template-columns:100mm minmax(0,1fr);min-height:66mm;background:var(--paper);overflow:hidden}
+.pg .hero img{height:0;min-height:100%}
+.pg .hero .ov{display:flex;flex-direction:column;justify-content:center;padding:3mm 7mm;border-top:1.2pt solid var(--gold)}
+.pg .hero h1{font:500 italic calc(21pt*var(--s,1))/1.05 Cormorant;margin:1.5mm 0 2.5mm}
+.pg .hero p{font-size:calc(8.2pt*var(--s,1));color:var(--mute)}
 .pg .hero .sig{font:500 italic 11.5pt Cormorant;color:var(--gold);margin-top:2.5mm}
-.pg .hero .q{margin-top:3mm;padding-top:2.5mm;border-top:.5pt solid var(--line);font:500 italic 11pt/1.25 Cormorant}
+.pg .hero .q{margin-top:3mm;padding-top:2.5mm;border-top:.5pt solid var(--line);font:500 italic calc(11pt*var(--s,1))/1.25 Cormorant}
+.pg .hero .q.info,.pg .side .quote.info{font:500 calc(10.5pt*var(--s,1))/1.28 Cormorant;font-style:normal}
+.pg .hero .q.info small,.pg .side .quote.info small{display:flex;align-items:center;gap:1.2mm;margin:0 0 1mm}
 .pg .hero .q small{display:block;font:700 6pt Lato;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-top:1mm;font-style:normal}
 .pg .wx{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:.5pt solid var(--line);border-bottom:.5pt solid var(--line);margin-top:4mm}
 .pg .wx>div{padding:4mm 3mm;border-right:.5pt solid var(--line);text-align:center;display:flex;flex-direction:column;justify-content:center}
@@ -111,6 +113,8 @@ body.online .localonly{display:none}
 .pg .wx .row{display:flex;align-items:center;justify-content:center;gap:2.5mm}
 .pg .wx .parts{display:flex;gap:2mm;margin-left:1mm;font-size:6.6pt;text-align:center;color:var(--mute)}
 .pg .wx .parts .ic{display:block;margin:0 auto .6mm}
+.pg .wx .desc{font:500 italic 11pt/1.1 Cormorant;margin-top:1.2mm}
+.pg .wx .meta{display:flex;justify-content:center;gap:3.5mm;font-size:6.8pt;color:var(--mute);margin-top:1mm}.pg .wx .meta span{display:flex;align-items:center;gap:1mm}
 .pg .wx .sun{display:flex;justify-content:center;gap:4mm;font-size:6.8pt;color:var(--mute);margin-top:2mm}
 .pg .wx .sun span{display:flex;align-items:center;gap:1.2mm}.pg .wx .sun b{color:var(--ink);font-weight:700}
 .pg .spa{margin-bottom:4mm;background:var(--paper);padding:2.5mm 4mm 3mm;border-top:1.2pt solid var(--gold)}
@@ -151,7 +155,7 @@ body.online .localonly{display:none}
 .pg .or{font:500 italic calc(9pt*var(--s,1)) Cormorant;color:var(--gold);margin:.3mm 0}
 .pg .side{border-left:.5pt solid var(--line);padding-left:5mm}
 .pg .quote{position:relative;font:500 italic 13pt/1.25 Cormorant;padding-top:6mm}
-.pg .quote .ic{position:absolute;top:0;left:0;color:var(--gold)}
+.pg .quote .ic{position:absolute;top:0;left:0;color:var(--gold)}.pg .quote.info{padding-top:0}.pg .quote.info .ic{position:static}
 .pg .quote small{display:block;font:700 6.4pt Lato;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-top:1.5mm;font-style:normal}
 .pg .duck{height:24mm;margin:2mm 0}
 .pg .note{font-size:7pt;color:var(--mute);line-height:1.45;margin-top:1.5mm}
@@ -242,6 +246,9 @@ body.online .localonly{display:none}
       <label>Unterschrift</label><input data-k="day.greeting.sign">
       <label>Spruch des Tages</label><textarea class="prose" data-k="day.quote.text" rows="2"></textarea>
       <div class="row2"><input data-k="day.quote.author" placeholder="Autor"><button data-act="quote">Zufällig aus Bibliothek</button></div>
+      <label class="toggle"><input type="checkbox" data-k="day.notice.on"> Hotel-Info statt Spruch des Tages</label>
+      <textarea class="prose" data-k="day.notice.text" rows="2" placeholder="z. B. Heute ab 16 Uhr Glühwein und Live-Musik am Kamin – herzlich willkommen!"></textarea>
+      <p class="hint">Gilt nur für diese Ausgabe. Übersetzungen: Einstellungen → Übersetzungen → „Hotel-Info des Tages“. Kurz halten (max. ca. 2 Zeilen).</p>
       <label>Wetter Reit im Winkl</label>
       <div id="wxform"></div>
       <button class="sm" data-act="weather">Wetter neu laden</button>
@@ -860,17 +867,17 @@ if (SUPA) {
 const LANGS = { de: 'Deutsch', en: 'English', fr: 'Français', it: 'Italiano', nl: 'Nederlands', bs: 'Bosanski' };
 const LOCALE = { de: 'de-DE', en: 'en-GB', fr: 'fr-FR', it: 'it-IT', nl: 'nl-NL', bs: 'bs-Latn-BA' };
 const LBL = {
-  de: { today: 'Heute', tomorrow: 'Morgen', after: 'Übermorgen', parts: ['Vormittag', 'Mittag', 'Abend'], sun: 'Sonne', rise: 'Aufgang', set: 'Untergang',
+  de: { notice: 'Heute im Hotel', hrs: 'Std.', wx: { sun: 'Sonnig', cloudsun: 'Heiter bis wolkig', cloud: 'Bewölkt', rain: 'Regen', snow: 'Schneefall', storm: 'Gewitter' }, today: 'Heute', tomorrow: 'Morgen', after: 'Übermorgen', parts: ['Vormittag', 'Mittag', 'Abend'], sun: 'Sonne', rise: 'Aufgang', set: 'Untergang',
     qod: 'Spruch des Tages', menu: 'MENÜ', or: 'oder', issue: 'Ausgabe Nr.', no: 'Nr.', pre: 'Auf Vorbestellung', mobile: 'Für Smartphone & Tablet', todayTag: 'HEUTE', q: ['„', '“'] },
-  en: { today: 'Today', tomorrow: 'Tomorrow', after: 'Day after', parts: ['Morning', 'Midday', 'Evening'], sun: 'Sun', rise: 'Sunrise', set: 'Sunset',
+  en: { notice: 'Today at the hotel', hrs: 'h', wx: { sun: 'Sunny', cloudsun: 'Partly cloudy', cloud: 'Cloudy', rain: 'Rain', snow: 'Snow', storm: 'Thunderstorms' }, today: 'Today', tomorrow: 'Tomorrow', after: 'Day after', parts: ['Morning', 'Midday', 'Evening'], sun: 'Sun', rise: 'Sunrise', set: 'Sunset',
     qod: 'Quote of the day', menu: 'MENU', or: 'or', issue: 'Issue no.', no: 'No.', pre: 'Pre-order', mobile: 'For smartphone & tablet', todayTag: 'TODAY', q: ['“', '”'] },
-  fr: { today: 'Aujourd’hui', tomorrow: 'Demain', after: 'Après-demain', parts: ['Matin', 'Midi', 'Soir'], sun: 'Soleil', rise: 'Lever', set: 'Coucher',
+  fr: { notice: 'Aujourd’hui à l’hôtel', hrs: 'h', wx: { sun: 'Ensoleillé', cloudsun: 'Éclaircies', cloud: 'Nuageux', rain: 'Pluie', snow: 'Neige', storm: 'Orages' }, today: 'Aujourd’hui', tomorrow: 'Demain', after: 'Après-demain', parts: ['Matin', 'Midi', 'Soir'], sun: 'Soleil', rise: 'Lever', set: 'Coucher',
     qod: 'Citation du jour', menu: 'MENU', or: 'ou', issue: 'Édition n°', no: 'n°', pre: 'Sur commande', mobile: 'Pour smartphone & tablette', todayTag: 'AUJOURD’HUI', q: ['« ', ' »'] },
-  it: { today: 'Oggi', tomorrow: 'Domani', after: 'Dopodomani', parts: ['Mattina', 'Mezzodì', 'Sera'], sun: 'Sole', rise: 'Alba', set: 'Tramonto',
+  it: { notice: 'Oggi in hotel', hrs: 'h', wx: { sun: 'Soleggiato', cloudsun: 'Poco nuvoloso', cloud: 'Nuvoloso', rain: 'Pioggia', snow: 'Neve', storm: 'Temporali' }, today: 'Oggi', tomorrow: 'Domani', after: 'Dopodomani', parts: ['Mattina', 'Mezzodì', 'Sera'], sun: 'Sole', rise: 'Alba', set: 'Tramonto',
     qod: 'Frase del giorno', menu: 'MENÙ', or: 'oppure', issue: 'Edizione n.', no: 'n.', pre: 'Su prenotazione', mobile: 'Per smartphone e tablet', todayTag: 'OGGI', q: ['«', '»'] },
-  nl: { today: 'Vandaag', tomorrow: 'Morgen', after: 'Overmorgen', parts: ['Ochtend', 'Middag', 'Avond'], sun: 'Zon', rise: 'Opkomst', set: 'Ondergang',
+  nl: { notice: 'Vandaag in het hotel', hrs: 'uur', wx: { sun: 'Zonnig', cloudsun: 'Half bewolkt', cloud: 'Bewolkt', rain: 'Regen', snow: 'Sneeuw', storm: 'Onweer' }, today: 'Vandaag', tomorrow: 'Morgen', after: 'Overmorgen', parts: ['Ochtend', 'Middag', 'Avond'], sun: 'Zon', rise: 'Opkomst', set: 'Ondergang',
     qod: 'Spreuk van de dag', menu: 'MENU', or: 'of', issue: 'Editie nr.', no: 'nr.', pre: 'Op bestelling', mobile: 'Voor smartphone & tablet', todayTag: 'VANDAAG', q: ['“', '”'] },
-  bs: { today: 'Danas', tomorrow: 'Sutra', after: 'Prekosutra', parts: ['Jutro', 'Podne', 'Večer'], sun: 'Sunce', rise: 'Izlazak', set: 'Zalazak',
+  bs: { notice: 'Danas u hotelu', hrs: 'h', wx: { sun: 'Sunčano', cloudsun: 'Djelimično oblačno', cloud: 'Oblačno', rain: 'Kiša', snow: 'Snijeg', storm: 'Grmljavina' }, today: 'Danas', tomorrow: 'Sutra', after: 'Prekosutra', parts: ['Jutro', 'Podne', 'Večer'], sun: 'Sunce', rise: 'Izlazak', set: 'Zalazak',
     qod: 'Misao dana', menu: 'MENI', or: 'ili', issue: 'Izdanje br.', no: 'br.', pre: 'Po narudžbi', mobile: 'Za pametni telefon i tablet', todayTag: 'DANAS', q: ['„', '“'] },
 };
 // übersetzbare Texte der Ausgabe: Pfad im Zustand, Bezeichnung im Formular, mehrzeilig?
@@ -878,7 +885,7 @@ const TR_KEYS = [
   ['settings.masthead', 'Name der Zeitung'], ['settings.tagL', 'Zeile links'], ['settings.tagR', 'Zeile rechts'], ['settings.p2tag', 'Kopfzeile Rückseite'],
   ['day.greeting.title', 'Begrüßung – Überschrift'], ['day.greeting.text', 'Begrüßung – Text', 1], ['day.greeting.sign', 'Unterschrift'],
   ['spa.title', 'Wochenprogramm – Überschrift'], ['spa.intro', 'Wochenprogramm – Einleitung', 1], ['spa.note', 'Wochenprogramm – Hinweis', 1], ['spa.empty', 'Tage ohne Termin'],
-  ['special.kicker', 'Vorbestellung – Rubrik'], ['special.title', 'Vorbestellung – Titel'], ['special.note', 'Vorbestellung – Text', 1],
+  ['day.notice.text', 'Hotel-Info des Tages (statt Spruch)', 1], ['special.kicker', 'Vorbestellung – Rubrik'], ['special.title', 'Vorbestellung – Titel'], ['special.note', 'Vorbestellung – Text', 1],
   ['gm.kicker', 'Gästemappe – Rubrik'], ['gm.shortTitle', 'Gästemappe – Überschrift kurz'], ['gm.short', 'Gästemappe – Text kurz', 1],
   ['gm.title', 'Gästemappe – Überschrift lang'], ['gm.text', 'Gästemappe – Text lang', 1], ['hp.note', 'Hinweis unter den Menüs'],
 ];
@@ -964,6 +971,7 @@ function makeView(l) {
     greeting: { title: txt('day.greeting.title'), text: txt('day.greeting.text'), sign: txt('day.greeting.sign') },
     spa: { ...S.spa, title: txt('spa.title'), intro: txt('spa.intro'), note: txt('spa.note'), empty: txt('spa.empty'),
       week: Object.fromEntries(Object.entries(S.spa.week || {}).map(([d, v]) => [d, String(v || '').split(/[;\n]/).map(x => x.trim()).filter(Boolean).map(ev).join('; ')])) },
+    notice: S.day.notice?.on && String(S.day.notice.text || '').trim() ? txt('day.notice.text') : '',
     special: { ...S.special, kicker: txt('special.kicker'), title: txt('special.title'), note: txt('special.note') },
     gm: { ...S.gm, kicker: txt('gm.kicker'), shortTitle: txt('gm.shortTitle'), short: txt('gm.short'), title: txt('gm.title'), text: txt('gm.text') },
     menus: S.day.menus.map(menu), tip: tipV, quote: quote(), hpnote: S.hp?.note ? txt('hp.note') : '',
@@ -1043,6 +1051,8 @@ const ICONS = {
   rain: '<path d="M7 15.5H6a3.6 3.6 0 0 1-.4-7.2 5.5 5.5 0 0 1 10.6-1.3 4.3 4.3 0 0 1 1.3 8.5"/><path d="M8.5 18l-1 2.5M12.5 18l-1 2.5M16.5 18l-1 2.5"/>',
   snow: '<path d="M7 14.5H6a3.6 3.6 0 0 1-.4-7.2 5.5 5.5 0 0 1 10.6-1.3 4.3 4.3 0 0 1 1.3 8.5"/><path d="M8 18h.01M12 17h.01M16 18h.01M10 21h.01M14 21h.01" stroke-width="2.4"/>',
   storm: '<path d="M7 16.5H6a3.7 3.7 0 0 1-.4-7.4 5.5 5.5 0 0 1 10.6-1.4A4.4 4.4 0 0 1 17.5 16.5"/><path d="M12.5 12l-2.5 4.5h3.5L11 21"/>',
+  drop: '<path d="M12 3.5s5.5 6 5.5 10.2a5.5 5.5 0 0 1-11 0C6.5 9.5 12 3.5 12 3.5z"/>',
+  bell: '<path d="M6 9a6 6 0 0 1 12 0c0 6.5 2.5 8 2.5 8h-17S6 15.5 6 9z"/><path d="M10.2 20.5a2 2 0 0 0 3.6 0"/>',
   sunrise: '<path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 4v5M9.5 6.5L12 4l2.5 2.5"/>',
   sunset: '<path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 4v5M9.5 6.5L12 9l2.5-2.5"/>',
   fork: '<path d="M7 3v7a2 2 0 0 0 4 0V3M9 3v18M16 3c-1.7 1.2-2.5 3.5-2.5 6.5 0 1.8.9 3 2.5 3V21"/>',
@@ -1345,7 +1355,9 @@ function renderFront(guide, V = makeView('de')) {
   const three = menus.length >= 3;
   const wxDays = [1, 2].map(k => {
     const dd = pd(addDays(D.date, k)), w = W.days[k] || {};
-    return `<div><div class="lab">${k === 1 ? E(L.tomorrow) : E(L.after)} · ${wdShort(dd.getDay(), l)}</div><div class="row">${icon(w.icon || 'cloud', '10mm', 1.2)}<div class="tm">${deg(w.max)}°<small> / ${deg(w.min)}°</small></div></div></div>`;
+    const meta = [w.pp !== '' && w.pp != null ? `<span>${icon('drop', '3.6mm')} ${w.pp} %</span>` : '', w.sh !== '' && w.sh != null ? `<span>${icon('sun', '3.6mm')} ${w.sh} ${E(L.hrs)}</span>` : ''].join('');
+    return `<div><div class="lab">${k === 1 ? E(L.tomorrow) : E(L.after)} · ${wdShort(dd.getDay(), l)}</div><div class="row">${icon(w.icon || 'cloud', '10mm', 1.2)}<div class="tm">${deg(w.max)}°<small> / ${deg(w.min)}°</small></div></div>
+      <div class="desc">${E(L.wx[w.icon || 'cloud'])}</div>${meta ? `<div class="meta">${meta}</div>` : ''}</div>`;
   }).join('');
   const t0 = W.days[0] || {};
   const wx = `<div class="wx">
@@ -1359,7 +1371,7 @@ function renderFront(guide, V = makeView('de')) {
     return `<div class="${d === today ? 'today' : ''}"><div class="d"><span>${wdShort(WDS.indexOf(d), l)}</span><small>${weekDate(D.date, d, l)}</small></div>${d === today ? `<div class="tt">${E(L.todayTag)}</div>` : ''}${ev || `<div class="none">${E(V.spa.empty)}</div>`}</div>`;
   }).join('');
   const Q = V.quote, SP = V.special;
-  const side = `<div class="side"><div class="quote">${icon('quote', '6mm', 1.1)}${E(Q.text)}<small>— ${E(Q.author)}</small></div>
+  const side = `<div class="side">${V.notice ? `<div class="quote info"><small>${icon('bell', '3.4mm', 1.6)} ${E(L.notice)}</small>${E(V.notice)}</div>` : `<div class="quote">${icon('quote', '6mm', 1.1)}${E(Q.text)}<small>— ${E(Q.author)}</small></div>`}
     <div style="border-top:.5pt solid var(--line);margin:3.5mm 0 3mm"></div>
     <div class="kick">${E(SP.kicker || L.pre)}</div><h2 style="font-size:14pt">${E(SP.title)}</h2>
     <img class="cover duck" src="${src(SP.img)}"><div class="note">${E(SP.note)}</div></div>`;
@@ -1371,7 +1383,7 @@ function renderFront(guide, V = makeView('de')) {
     <div class="tagline"><span>${E(st.tagL)}</span><span>${E(st.tagR)}</span></div>
     <div class="hero"><img class="cover" src="${heroImg()}"><div class="ov">${three ? '' : `<div class="kick">${wd}, ${dl}</div>`}
       <h1>${E(V.greeting.title)}</h1><p>${E(V.greeting.text)}</p><div class="sig">${E(V.greeting.sign)}</div>
-      ${three ? `<div class="q">${L.q[0]}${E(Q.text)}${L.q[1]}<small>${E(L.qod)} · ${E(Q.author)}</small></div>` : ''}</div></div>
+      ${three ? (V.notice ? `<div class="q info"><small>${icon('bell', '3.4mm', 1.6)} ${E(L.notice)}</small>${E(V.notice)}</div>` : `<div class="q">${L.q[0]}${E(Q.text)}${L.q[1]}<small>${E(L.qod)} · ${E(Q.author)}</small></div>`) : ''}</div></div>
     ${wx}
   </div>
   <div class="half bottom" data-area="Vorderseite unten (Menüs)">
@@ -1455,14 +1467,15 @@ function wmo(c) {
 }
 async function loadWeather() {
   const d0 = S.day.date, d2 = addDays(d0, 2), st = S.settings;
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${st.lat}&longitude=${st.lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset&hourly=weather_code&timezone=Europe%2FBerlin&start_date=${d0}&end_date=${d2}`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${st.lat}&longitude=${st.lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max,sunshine_duration&hourly=weather_code&timezone=Europe%2FBerlin&start_date=${d0}&end_date=${d2}`;
   status('Wetter wird geladen …');
   try {
     const r = await fetch(url); if (!r.ok) throw new Error('HTTP ' + r.status);
     const j = await r.json(), dy = j.daily, hr = j.hourly;
     const at = h => { const i = hr.time.indexOf(`${d0}T${h}:00`); return wmo(i >= 0 ? hr.weather_code[i] : null); };
     S.day.weather = {
-      days: [0, 1, 2].map(i => ({ min: Math.round(dy.temperature_2m_min[i]), max: Math.round(dy.temperature_2m_max[i]), icon: wmo(dy.weather_code[i]) })),
+      days: [0, 1, 2].map(i => ({ min: Math.round(dy.temperature_2m_min[i]), max: Math.round(dy.temperature_2m_max[i]), icon: wmo(dy.weather_code[i]),
+        pp: dy.precipitation_probability_max?.[i] ?? '', sh: dy.sunshine_duration?.[i] != null ? Math.round(dy.sunshine_duration[i] / 3600) : '' })),
       parts: [at('09'), at('12'), at('18')],
       sunrise: dy.sunrise[0].slice(11, 16), sunset: dy.sunset[0].slice(11, 16),
       src: 'Open-Meteo, geladen ' + new Date().toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }),
@@ -1509,7 +1522,7 @@ async function changeDate(v) {
     status('Ausgabe ' + pd(v).toLocaleDateString('de-DE') + ' wird geladen …');
     await Remote.flush(); await Remote.openDay(v); fillAll(); status(''); render(); return;
   }
-  S.day.date = v; S.day.weather = null; const hm = hpMenus(v); if (hm) { S.day.menus = hm; bindAll(); }
+  S.day.date = v; S.day.weather = null; S.day.notice = { on: false, text: '' }; const hm = hpMenus(v); if (hm) { S.day.menus = hm; bindAll(); }
   fillWeatherForm(); suggestHero(); fillLib(); loadWeather(); save(); render();
 }
 
@@ -1539,6 +1552,8 @@ function fillWeatherForm() {
     <span class="hd">Höchst °C</span>${[0, 1, 2].map(i => `<input type="number" data-w="days.${i}.max" value="${d[i]?.max ?? ''}">`).join('')}
     <span class="hd">Tiefst °C</span>${[0, 1, 2].map(i => `<input type="number" data-w="days.${i}.min" value="${d[i]?.min ?? ''}">`).join('')}
     <span class="hd">Wetter</span>${[0, 1, 2].map(i => `<select data-w="days.${i}.icon">${opt(d[i]?.icon)}</select>`).join('')}
+    <span class="hd">Regen %</span>${[0, 1, 2].map(i => `<input type="number" min="0" max="100" data-w="days.${i}.pp" value="${d[i]?.pp ?? ''}">`).join('')}
+    <span class="hd">Sonne Std.</span>${[0, 1, 2].map(i => `<input type="number" min="0" max="16" data-w="days.${i}.sh" value="${d[i]?.sh ?? ''}">`).join('')}
     <span class="hd">Heute</span>${['Vormittag', 'Mittag', 'Abend'].map((l, i) => `<select data-w="parts.${i}" title="${l}">${opt(W.parts[i])}</select>`).join('')}
     <span class="hd"></span><span class="hint" style="margin:0">Vormittag</span><span class="hint" style="margin:0">Mittag</span><span class="hint" style="margin:0">Abend</span>
     <span class="hd">Sonne</span><input data-w="sunrise" value="${E(W.sunrise)}" placeholder="Aufgang"><input data-w="sunset" value="${E(W.sunset)}" placeholder="Untergang"><span></span>
@@ -1731,7 +1746,7 @@ async function init() {
     catch (e) { S = freshState(); status('Speicher nicht verfügbar – Änderungen gehen beim Schließen verloren.', true); }
     // neuer Tag beim Öffnen: Datum vorschlagen, Tagesdaten zurücksetzen
     const nd = defaultDate();
-    if (S.day.date < nd) { S.day.date = nd; S.day.weather = null; suggestHero(); const hm = hpMenus(nd); if (hm) S.day.menus = hm; }
+    if (S.day.date < nd) { S.day.date = nd; S.day.weather = null; S.day.notice = { on: false, text: '' }; suggestHero(); const hm = hpMenus(nd); if (hm) S.day.menus = hm; }
   }
   S.ui ??= { guide: true, zoom: 0.8 }; S.ui.lang ??= 'de';
   syncState();
