@@ -1652,15 +1652,16 @@ async function libImport() {
     const j = JSON.parse(await f.text()), L = j.lib || j;
     if (!L.tips && !L.quotes && !L.heroes && !L.dict) throw new Error('keine Bibliotheksdatei');
     const n = mergeLib(L); fillLib(); save(); render();
-    status(`Bibliothek ergänzt: ${n.tips} neue Bausteine, ${n.en} Übersetzungen nachgetragen, ${n.quotes} neue Sprüche, ${n.heroes} neue Titelbilder, ${n.dict} Wörterbuch-/Texteinträge.`); fillTr();
+    status(`Bibliothek ergänzt: ${n.tips} neue Bausteine, ${n.en} Übersetzungen nachgetragen, ${n.quotes} neue Sprüche, ${n.heroes} neue Titelbilder, ${n.img} Bilder nachgetragen, ${n.dict} Wörterbuch-/Texteinträge.`); fillTr();
   } catch (e) { status('Bibliothek ergänzen fehlgeschlagen: ' + e.message, true); }
 }
 function mergeLib(L) {
-  const n = { tips: 0, en: 0, quotes: 0, heroes: 0, dict: 0 }, norm = s => String(s || '').replace(/[^\p{L}\p{N}]/gu, '').toLowerCase();
+  const n = { tips: 0, en: 0, quotes: 0, heroes: 0, dict: 0, img: 0 }, norm = s => String(s || '').replace(/[^\p{L}\p{N}]/gu, '').toLowerCase();
   (L.tips || []).forEach(t => {
     const ex = S.lib.tips.find(x => x.id === t.id);
     if (!ex) { if (!t.title) return; S.lib.tips.push(clone(t)); n.tips++; return; }
     for (const l of TR_LANGS()) if (t[l] && !ex[l]?.title) { ex[l] = clone(t[l]); n.en++; }
+    if (t.img && !ex.img) { ex.img = t.img; n.img++; }
   });
   (L.heroes || []).forEach(h => { if (!S.lib.heroes.some(x => x.id === h.id)) { S.lib.heroes.push(clone(h)); n.heroes++; } });
   (L.quotes || []).forEach(q => {
