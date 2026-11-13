@@ -204,6 +204,11 @@ body.online .localonly{display:none}
 .pg .dish .ck{display:block;font:700 calc(5.4pt*var(--s,1)) Lato;font-style:normal;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-bottom:.3mm}
 .pg .low.days .menu.hpm+.menu.hpm{border-left:.5pt solid var(--line)}
 .pg .hpnote{text-align:center;font:300 italic calc(7pt*var(--s,1)) Lato;color:var(--mute);margin-top:2.2mm}
+
+/* Vorderseite unten: Menüs oben, Wochenprogramm unten */
+.pg .half.fb{display:flex;flex-direction:column}
+.pg .half.fb .spa{margin:auto 0 0;padding-top:2.2mm}
+.pg .half.fb .hpnote{margin-bottom:3mm}
 </style>
 <style id="pagestyle">@page{size:A3;margin:0}</style>
 </head><body>
@@ -1373,10 +1378,10 @@ function renderFront(guide, V = makeView('de')) {
       ${three ? `<div class="q">${L.q[0]}${E(Q.text)}${L.q[1]}<small>${E(L.qod)} · ${E(Q.author)}</small></div>` : ''}</div></div>
     ${wx}
   </div>
-  <div class="half bottom" data-area="Vorderseite unten (Menüs)">
-    <div class="spa"><div class="hd"><h2>${E(V.spa.title)}</h2><p>${E(V.spa.intro)}<br>${E(V.spa.note)}</p><img src="${src(S.assets.qrSpa)}"></div><div class="week">${week}</div></div>
+  <div class="half bottom fb" data-area="Vorderseite unten (Menüs)">
     <div class="low${three ? ' three' : menus.length === 1 ? ' one' : ''}${menus.some(m => m.day || m.sub) ? ' days' : ''}">${menus.map((m, i) => menuHTML(m, i, L, l)).join('')}${three ? '' : side}</div>
     ${menus.some(m => m.sub) && V.hpnote ? `<div class="hpnote">${E(V.hpnote)}</div>` : ''}
+    <div class="spa"><div class="hd"><h2>${E(V.spa.title)}</h2><p>${E(V.spa.intro)}<br>${E(V.spa.note)}</p><img src="${src(S.assets.qrSpa)}"></div><div class="week">${week}</div></div>
   </div>
   <div class="foot"><span>${E(st.web)}</span><img src="${src(S.assets.rc)}"><span>${E(st.masthead)} ${E(L.no)} ${dayOfYear(D.date)}</span></div></section>`;
 }
